@@ -57,3 +57,15 @@ For more details on using torch.hub.load, refer to the PyTorch Hub Model Loading
 ![SystemDiagram](https://github.com/Ali-Rizvi-1/Human-Localization-using-YOLOv3/blob/main/Capstone%20-%20SystemDiagram.png)
 
 By following these instructions, you should be able to run and execute the code successfully.
+
+### Citation
+If you use this code or our dataset (including test set), please cite:
+
+```
+@INPROCEEDINGS{9953174,
+  author={Ali Rizvi, Syed Muhammad and Mobin Ahmed, Rameen and Alamdar, Khawaja Ghulam and Raza Khorasani, Mehdi and Memon, Junaid Ahmed},
+  booktitle={2022 4th International Conference on Robotics and Computer Vision (ICRCV)}, 
+  title={Human Detection and Localization in Indoor Disaster Environments Using UAVs}, 
+  year={2022},
+  pages={159-163},
+  doi={10.1109/ICRCV55858.2022.9953174}}
