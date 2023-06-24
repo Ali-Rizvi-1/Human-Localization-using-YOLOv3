@@ -6,3 +6,5 @@ The weights used for the YOLOv3 model can be found on the following link: https:
 Below is the system level diagram of the project, and it shows the connection of individual modules in the overall pipeline of the project.
 
 ![SystemDiagram](https://github.com/Ali-Rizvi-1/Human-Localization-using-YOLOv3/blob/main/Capstone%20-%20SystemDiagram.png)
+
+Documentation details on torch hub load: https://docs.ultralytics.com/yolov5/tutorials/pytorch_hub_model_loading/
