@@ -51,5 +51,5 @@ class PersonDetector:
         # Print bounding box coordinates
         for bbox in bounding_boxes:
             print(f"Bounding Box: {bbox}")
-
+        
         return bounding_boxes

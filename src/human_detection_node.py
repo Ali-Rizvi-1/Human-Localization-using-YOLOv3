@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import tf
 import rospy
 from sensor_msgs.msg import Image
 from nav_msgs.msg import Odometry
@@ -12,8 +13,6 @@ import numpy as np
 
 class HumanDetectionNode:
     def __init__(self):
-        # Initialize the ROS node
-        rospy.init_node('human_detection_node', anonymous=True)
 
         # Create a publisher for human centroids
         self.centroid_pub = rospy.Publisher('human_detection/human_centroids', PointStamped, queue_size=10)
@@ -34,12 +33,14 @@ class HumanDetectionNode:
         self.bridge = CvBridge()
 
         # Transformation matrices
-        self.local_transform = np.array([[1.0, 0.0, 0.0],
-                                         [0.0, 1.0, 0.0],
-                                         [0.0, 0.0, 1.0]])  # Local transformation matrix
-        self.global_transform = np.array([[1.0, 0.0, 0.0],
-                                          [0.0, 1.0, 0.0],
-                                          [0.0, 0.0, 1.0]])  # Global transformation matrix
+        # self.local_transform = np.array([[1.0, 0.0, 0.0],
+        #                                  [0.0, 1.0, 0.0],
+        #                                  [0.0, 0.0, 1.0]])  # Local transformation matrix
+        # self.global_transform = np.array([[1.0, 0.0, 0.0],
+        #                                   [0.0, 1.0, 0.0],
+        #                                   [0.0, 0.0, 1.0]])  # Global transformation matrix
+
+        # main logic of the node goes here! 
 
     def image_callback(self, msg):
         try:
@@ -49,8 +50,8 @@ class HumanDetectionNode:
             # Convert OpenCV image to PIL image
             pil_image = PILImage.fromarray(cv_image)
 
-            # Save the image temporarily (assuming you have write permissions)
-            pil_image.save('/path/to/temp_image.jpg')
+            # Save the image temporarily
+            # pil_image.save('/path/to/temp_image.jpg')
 
             # Detect people in the image
             bounding_boxes = self.detector.detect_person('/path/to/temp_image.jpg')
@@ -74,11 +75,15 @@ class HumanDetectionNode:
         # You can extract depth values and perform calculations to update the local_transform matrix
         pass
 
-    def odom_callback(self, msg):
+    def odom_callback(self, odom):
         # Process odometry here to update global transformation matrix
         # You can extract position and orientation information from the odometry message
         # and perform calculations to update the global_transform matrix
-        pass
+        _, _, yaw = tf.transformations.euler_from_quaternion([odom.pose.pose.orientation.x, 
+                                                              odom.pose.pose.orientation.y,
+                                                              odom.pose.pose.orientation.z,
+                                                              odom.pose.pose.orientation.w])
+        self.current_pose = np.array([odom.pose.pose.position.x, odom.pose.pose.position.y, yaw])
 
     def calculate_centroid(self, bbox):
         x_min, y_min, x_max, y_max = bbox
@@ -87,14 +92,12 @@ class HumanDetectionNode:
         return (centroid_x, centroid_y)
 
     def transform_local_coordinates(self, point):
-        local_point = np.array([point[0], point[1], 1])
-        transformed_local_point = np.dot(self.local_transform, local_point)
-        return (transformed_local_point[0], transformed_local_point[1])
+        transformed_local_point = point
+        return (transformed_local_point)
 
     def transform_global_coordinates(self, point):
-        global_point = np.array([point[0], point[1], 1])
-        transformed_global_point = np.dot(self.global_transform, global_point)
-        return (transformed_global_point[0], transformed_global_point[1])
+        transformed_global_point = point
+        return (transformed_global_point)
 
     def publish_centroids(self, centroids):
         for centroid in centroids:
@@ -109,6 +112,8 @@ class HumanDetectionNode:
 
 if __name__ == '__main__':
     try:
+        # Initialize the ROS node
+        rospy.init_node('human_detection_node', anonymous=True)
         node = HumanDetectionNode()
         node.run()
     except rospy.ROSInterruptException:
