@@ -1,5 +1,6 @@
 from typing import List, Tuple
 import cv2
+import numpy as np
 import torch
 from PIL import Image
 
@@ -21,18 +22,23 @@ class PersonDetector:
         model.classes = [0]  # Detect only person
         return model
 
-    def detect_person(self, image_path: str) -> List[Tuple[int, int, int, int]]:
+    def detect_person(self, image: Image.Image or np.ndarray) -> List[Tuple[int, int, int, int]]:
         """
         Detects people in the image and returns the bounding box coordinates of humans.
 
         Args:
-            image_path (str): Path to the image file.
+            image (PIL.Image.Image or np.ndarray): Input image.
 
         Returns:
             List[Tuple[int, int, int, int]]: List of bounding box coordinates (xmin, ymin, xmax, ymax).
         """
-        # Load image
-        image = Image.open(image_path).convert('RGB')
+        # Convert image to PIL Image if it's an ndarray
+        if isinstance(image, np.ndarray):
+            image = Image.fromarray(image)
+
+        # Convert image to RGB if it's not
+        if image.mode != "RGB":
+            image = image.convert("RGB")
 
         # Perform inference
         results = self.model([image], size=640)
