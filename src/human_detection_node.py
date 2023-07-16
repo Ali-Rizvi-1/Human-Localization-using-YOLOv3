@@ -11,18 +11,19 @@ from person_detector import PersonDetector
 import cv2
 from PIL import Image as PILImage
 import numpy as np
+import math
 
 class HumanDetectionNode:
     def __init__(self):
 
         # Create a publisher for human centroids
-        self.centroid_pub = rospy.Publisher('human_detection/human_centroids', PointStamped, queue_size=10)
+        self.centroid_pub = rospy.Publisher('human_detection/human_locations', PointStamped, queue_size=10)
 
         # Create a subscriber for color image
         self.image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.image_callback)
 
         # Create a subscriber for depth image
-        self.depth_sub = rospy.Subscriber('/camera/depth/image_raw', Image, self.depth_callback)
+        self.depth_sub = rospy.Subscriber('/camera/depth_aligned_to_color_and_infra1/image_raw', Image, self.depth_callback)
 
         # Create a subscriber for odometry
         self.odom_sub = rospy.Subscriber('/rtabmap/odom', Odometry, self.odom_callback)
@@ -82,8 +83,8 @@ class HumanDetectionNode:
         """
 
         self.pose = (
-            odom.pose.pose.position.x, 
-            odom.pose.pose.position.y, 
+            odom.pose.pose.position.x,
+            odom.pose.pose.position.y,
             odom.pose.pose.position.z
         )
         self.quaternion = (
@@ -123,11 +124,12 @@ class HumanDetectionNode:
 
         print(f"x = {a} and y = {b} and z = {y / 1000.0}")
 
-        if not any(local_centroid_list[h] - 2 < a < local_centroid_list[h] + 2
-                for h in range(0, len(local_centroid_list), 2)):
-            if a != 10000000.0 and b != 10000000.0:
-                local_centroid_point = (a, b)
-                return local_centroid_point
+        # if not any(local_centroid_list[h] - 2 < a < local_centroid_list[h] + 2
+        #         for h in range(0, len(local_centroid_list), 2)):
+
+        if a != 10000000.0 and b != 10000000.0:
+            local_centroid_point = (a, b)
+            return local_centroid_point
 
         return None
     
@@ -143,15 +145,16 @@ class HumanDetectionNode:
                 Tx = local_centroid_point[0] * math.cos(yaw) + local_centroid_point[1] * math.sin(yaw) + x1
                 Ty = local_centroid_point[0] * math.sin(yaw) - local_centroid_point[1] * math.cos(yaw) + y1
 
-                flag_x, flag_y = False, False
-                for i in range(0, len(global_centroid_list), 2):
-                    if Tx - 2.5 < global_centroid_list[i] < Tx + 2.5:
-                        flag_x = True
-                    if Ty - 2.5 < global_centroid_list[i + 1] < Ty + 2.5:
-                        flag_y = True
+                # flag_x, flag_y = False, False
+                # for i in range(0, len(global_centroid_list), 2):
+                #     if Tx - 2.5 < global_centroid_list[i] < Tx + 2.5:
+                #         flag_x = True
+                #     if Ty - 2.5 < global_centroid_list[i + 1] < Ty + 2.5:
+                #         flag_y = True
 
-                if not flag_x or not flag_y:
-                    return (Tx, Ty)
+                # if not flag_x or not flag_y:
+                
+                return (Tx, Ty)
 
         except Exception as e:
             print(f"Error in global_transformation: {e}")

@@ -1,3 +1,4 @@
+import time
 import cv2
 from PIL import Image
 from person_detector import PersonDetector
